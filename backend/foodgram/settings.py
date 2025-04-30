@@ -12,7 +12,9 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from pathlib import Path
 import environ
+import os
 import dj_database_url
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,6 +25,8 @@ env = environ.Env()
 
 # Загрузка переменных окружения из файла .env
 env.read_env()
+
+AUTH_USER_MODEL = 'auth_service.User'
 
 
 # Quick-start development settings - unsuitable for production
@@ -36,6 +40,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
 
 # Application definition
 
@@ -47,6 +54,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
+    'djoser',
+    'auth_service',
 ]
 
 MIDDLEWARE = [
@@ -87,6 +97,25 @@ DATABASES = {
     'default': dj_database_url.config(default=env('DATABASE_URL'))
 }
 
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+    ),
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+DJOSER = {
+    'LOGIN_FIELD': 'email',
+    'USER_CREATE_PASSWORD_RETYPE': True,
+    'USER_ID_FIELD': 'id',
+    'SERIALIZERS': {},
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators
