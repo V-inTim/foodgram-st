@@ -5,7 +5,11 @@ from rest_framework.response import Response
 from rest_framework import status
 
 from .models import User
-from .serializers import UserSerializer, UserAvatarSerializer, PasswordChangeSerializer
+from .serializers import (
+    UserSerializer,
+    UserAvatarSerializer,
+    PasswordChangeSerializer,
+)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -27,12 +31,14 @@ class AuthUserView(APIView):
         serializer = UserSerializer(user)
         return Response(serializer.data)
 
+
 class AvatarUserView(APIView):
     permission_classes = [IsAuthenticated]
 
     def put(self, request):
         user = request.user
-        serializer = UserAvatarSerializer(user, data=request.data, partial=True)
+        serializer = UserAvatarSerializer(user, data=request.data,
+                                          partial=True)
 
         if serializer.is_valid():
             serializer.save()
@@ -50,13 +56,12 @@ class PasswordChangeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        serializer = PasswordChangeSerializer(data=request.data, context={'request': request})
+        serializer = PasswordChangeSerializer(data=request.data,
+                                              context={'request': request})
 
         if serializer.is_valid():
             serializer.save()
-            return Response({"detail": "Password changed."}, status=status.HTTP_200_OK)
+            return Response({"detail": "Password changed."},
+                            status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-        

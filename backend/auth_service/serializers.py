@@ -1,7 +1,8 @@
-from rest_framework import serializers
-import base64, uuid
-from io import BytesIO
+import base64
+import uuid
+
 from django.core.files.base import ContentFile
+from rest_framework import serializers
 
 from .models import User
 
@@ -17,10 +18,12 @@ class Base64ImageField(serializers.ImageField):
 
                 file_name = f"{uuid.uuid4()}.{ext}"
                 return ContentFile(image_data, name=file_name)
-            except Exception as e:
+            except Exception:
                 raise serializers.ValidationError("Невалидная строка Base64")
         else:
-            raise serializers.ValidationError("Данные должны быть строкой Base64")
+            raise serializers.ValidationError(
+                "Данные должны быть строкой Base64"
+            )
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -29,8 +32,8 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['email', 'password', 'username', "first_name", "last_name", "id"]
-
+        fields = ['email', 'password', 'username',
+                  "first_name", "last_name", "id"]
 
     def create(self, validated_data):
         password = validated_data.pop('password')
@@ -60,6 +63,7 @@ class UserAvatarSerializer(serializers.ModelSerializer):
         user.avatar = None
         user.save()
 
+
 class PasswordChangeSerializer(serializers.Serializer):
     current_password = serializers.CharField(write_only=True)
     new_password = serializers.CharField(write_only=True)
@@ -75,4 +79,3 @@ class PasswordChangeSerializer(serializers.Serializer):
         new_password = self.validated_data['new_password']
         user.set_password(new_password)
         user.save()
-
