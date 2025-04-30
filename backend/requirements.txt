@@ -4,3 +4,7 @@ flake8
 django-environ
 dj-database-url
 psycopg2-binary
+djoser
+Pillow
+djangorestframework-simplejwt==4.7.2 
+environ
