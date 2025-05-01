@@ -1,0 +1,92 @@
+from rest_framework import serializers
+
+from .models import Recipe, RecipeIngredient, ShoppingList
+from foodgram.fields import Base64ImageField
+
+
+class RecipeIngredientSerializer(serializers.ModelSerializer):
+    name = serializers.CharField(source='ingredient.name', read_only=True)
+    measurement_unit = serializers.CharField(
+        source='ingredient.measurement_unit',
+        read_only=True,
+    )
+    id = serializers.IntegerField(source='ingredient.id')
+
+    class Meta:
+        model = RecipeIngredient
+        fields = ['id', 'name', 'measurement_unit', 'amount']
+
+
+class RecipeSerializer(serializers.ModelSerializer):
+    image = Base64ImageField()
+    ingredients = RecipeIngredientSerializer(
+        many=True,
+        required=True,
+        source='recipe_ingredients')
+
+    class Meta:
+        model = Recipe
+        fields = ['id', 'author', 'name', 'image',
+                  'text', 'ingredients', 'cooking_time']
+        read_only_fields = ['id', 'author']
+
+    def validate(self, data):
+        if self.context['request'].method == 'POST':
+            if 'image' not in data or data['image'] is None:
+                raise serializers.ValidationError(
+                    {"image": "Это поле обязательно при создании рецепта"}
+                )
+        return data
+
+    def create(self, validated_data):
+        ingredients_data = validated_data.pop('recipe_ingredients')
+        recipe = Recipe.objects.create(**validated_data)
+
+        for ingredient_data in ingredients_data:
+            RecipeIngredient.objects.create(
+                recipe=recipe,
+                ingredient_id=ingredient_data['ingredient']['id'],
+                amount=ingredient_data['amount'],
+            )
+
+        return recipe
+
+    def update(self, instance, validated_data):
+        ingredients_data = validated_data.pop('recipe_ingredients')
+        instance = super().update(instance, validated_data)
+
+        instance.ingredients.clear()
+        for ingredient_data in ingredients_data:
+            RecipeIngredient.objects.create(
+                recipe=instance,
+                ingredient_id=ingredient_data['ingredient']['id'],
+                amount=ingredient_data['amount']
+            )
+
+        return instance
+
+
+class ShortRecipeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recipe
+        fields = ['id', 'name', 'image', 'cooking_time']
+
+
+class ShoppingListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShoppingList
+        fields = ['recipe', 'user']
+
+    def to_representation(self, instance):
+        return ShortRecipeSerializer(instance.recipe).data
+
+    def delete(self):
+        user = self.context['request'].user
+        recipe_id = self.initial_data.get('recipe')
+        if not recipe_id:
+            return False
+        obj = ShoppingList.objects.filter(user=user, recipe=recipe_id).first()
+        if obj:
+            obj.delete()
+            return True
+        return False

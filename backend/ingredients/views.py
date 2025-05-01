@@ -4,7 +4,7 @@ from .serializers import IngredientSerializer
 from .models import Ingredient
 
 
-class IngredientView(viewsets.ReadOnlyModelViewSet):
+class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
 
