@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from django.contrib.auth import get_user_model
 
 from .models import Recipe, RecipeIngredient, ShoppingList
 from foodgram.fields import Base64ImageField
@@ -65,7 +64,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             )
 
         return instance
-    
+
 
 class ShortRecipeSerializer(serializers.ModelSerializer):
     class Meta:

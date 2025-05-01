@@ -1,6 +1,6 @@
 from rest_framework import status, viewsets
 from rest_framework.permissions import (
-    AllowAny, 
+    AllowAny,
     IsAuthenticatedOrReadOnly,
     IsAuthenticated,
 )
