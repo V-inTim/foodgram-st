@@ -23,6 +23,7 @@ urlpatterns = [
     path('api/auth/', include('djoser.urls.authtoken')),
     path('api/users/', include('auth_service.urls')),
     path('api/ingredients/', include('ingredients.urls')),
+    path('api/recipes/', include('recipes.urls')),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
