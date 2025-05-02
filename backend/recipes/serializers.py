@@ -1,6 +1,13 @@
+from collections import defaultdict
+
 from rest_framework import serializers
 
-from .models import Recipe, RecipeIngredient, ShoppingList
+from .models import (
+    Recipe,
+    RecipeIngredient,
+    ShoppingList,
+    Favorite,
+)
 from foodgram.fields import Base64ImageField
 
 
@@ -86,6 +93,58 @@ class ShoppingListSerializer(serializers.ModelSerializer):
         if not recipe_id:
             return False
         obj = ShoppingList.objects.filter(user=user, recipe=recipe_id).first()
+        if obj:
+            obj.delete()
+            return True
+        return False
+
+    def get_shopping_list(self):
+        user = self.context['request'].user
+        shopping_list = (
+            ShoppingList.objects.filter(user=user)
+            .select_related('recipe')
+            .prefetch_related('recipe__recipe_ingredients__ingredient')
+        )
+
+        ingredient_data = defaultdict(
+            lambda: {'name': '', 'measurement_unit': '', 'amount': 0}
+        )
+
+        for item in shopping_list:
+            recipe = item.recipe
+            for ri in recipe.recipe_ingredients.all():
+                ingredient = ri.ingredient
+                key = ingredient.id
+                ingredient_data[key]['name'] = ingredient.name
+                ingredient_data[key]['measurement_unit'] = (
+                    ingredient.measurement_unit
+                )
+                ingredient_data[key]['amount'] += ri.amount
+
+        lines = []
+        for data in ingredient_data.values():
+            name = data['name']
+            unit = data['measurement_unit']
+            amount = data['amount']
+            lines.append(f'{name} ({unit}) — {amount}')
+
+        return '\n'.join(lines)
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Favorite
+        fields = ['recipe', 'user']
+
+    def to_representation(self, instance):
+        return ShortRecipeSerializer(instance.recipe).data
+
+    def delete(self):
+        user = self.context['request'].user
+        recipe_id = self.initial_data.get('recipe')
+        if not recipe_id:
+            return False
+        obj = Favorite.objects.filter(user=user, recipe=recipe_id).first()
         if obj:
             obj.delete()
             return True
