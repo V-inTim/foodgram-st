@@ -72,3 +72,27 @@ class ShoppingList(models.Model):
 
     def __str__(self):
         return f'{self.user} - {self.recipe}'
+
+
+class Favorite(models.Model):
+    user = models.ForeignKey(
+        get_user_model(),
+        on_delete=models.CASCADE,
+        related_name='user_favorite'
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        related_name='recipe_favorite'
+    )
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_favorite'
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.user} - {self.recipe}'
