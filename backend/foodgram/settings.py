@@ -26,7 +26,7 @@ env = environ.Env()
 # Загрузка переменных окружения из файла .env
 env.read_env()
 
-AUTH_USER_MODEL = 'auth_service.User'
+AUTH_USER_MODEL = 'users.User'
 
 
 # Quick-start development settings - unsuitable for production
@@ -56,7 +56,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'djoser',
-    'auth_service',
+    'django_filters',
+    'users',
     'ingredients',
     'recipes',
 ]
@@ -104,6 +105,9 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
     ),
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+    ],
 }
 
 SIMPLE_JWT = {

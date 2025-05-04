@@ -8,3 +8,4 @@ djoser
 Pillow
 djangorestframework-simplejwt==4.7.2 
 environ
+django-filter
