@@ -7,6 +7,7 @@ from rest_framework.permissions import (
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.http import HttpResponse
+from django_filters.rest_framework import DjangoFilterBackend
 
 from foodgram.pagination import CustomPagination
 from foodgram.permissions import IsAuthorOrReadOnly
@@ -16,6 +17,7 @@ from .serializers import (
     FavoriteSerializer,
 )
 from .models import Recipe
+from .filters import RecipeFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -23,13 +25,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     serializer_class = RecipeSerializer
     pagination_class = CustomPagination
     permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
-
-    def get_queryset(self):
-        queryset = super().get_queryset()
-        author = self.request.query_params.get('author')
-        if author:
-            queryset = queryset.filter(author=author)
-        return queryset
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = RecipeFilter
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
