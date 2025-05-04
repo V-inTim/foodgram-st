@@ -69,6 +69,7 @@ class ShoppingList(models.Model):
                 name='unique_shopping_list'
             )
         ]
+        default_related_name = "shopping_list"
 
     def __str__(self):
         return f'{self.user} - {self.recipe}'
@@ -93,6 +94,7 @@ class Favorite(models.Model):
                 name='unique_favorite'
             )
         ]
+        default_related_name = "favorites"
 
     def __str__(self):
         return f'{self.user} - {self.recipe}'
