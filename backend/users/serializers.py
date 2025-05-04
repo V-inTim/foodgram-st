@@ -23,7 +23,7 @@ class UserSerializer(serializers.ModelSerializer):
             user=request.user,
             followed_user=obj
         ).exists()
-    
+
     def create(self, validated_data):
         password = validated_data.pop('password')
         user = User(**validated_data)
