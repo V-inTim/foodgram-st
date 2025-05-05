@@ -9,6 +9,7 @@ from .models import (
     Favorite,
 )
 from foodgram.fields import Base64ImageField
+from users.serializers import UserSerializer
 
 
 class RecipeIngredientSerializer(serializers.ModelSerializer):
@@ -26,6 +27,7 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     image = Base64ImageField()
+    author = UserSerializer(read_only=True)
     ingredients = RecipeIngredientSerializer(
         many=True,
         required=True,
@@ -35,7 +37,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = ['id', 'author', 'name', 'image',
                   'text', 'ingredients', 'cooking_time']
-        read_only_fields = ['id', 'author']
+        read_only_fields = ['id']
 
     def validate(self, data):
         if self.context['request'].method == 'POST':
