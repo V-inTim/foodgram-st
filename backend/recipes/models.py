@@ -23,6 +23,10 @@ class Recipe(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = "Рецепт"
+        verbose_name_plural = "Рецепты"
+
 
 class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
@@ -69,6 +73,8 @@ class ShoppingList(models.Model):
                 name='unique_shopping_list'
             )
         ]
+        verbose_name = "Продукт"
+        verbose_name_plural = "Продукты"
         default_related_name = "shopping_list"
 
     def __str__(self):
@@ -94,6 +100,8 @@ class Favorite(models.Model):
                 name='unique_favorite'
             )
         ]
+        verbose_name = "Избранное"
+        verbose_name_plural = "Избранное"
         default_related_name = "favorites"
 
     def __str__(self):
