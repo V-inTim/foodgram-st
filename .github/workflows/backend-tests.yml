@@ -2,12 +2,12 @@ name: Django Tests
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ develop ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ develop ]
 
 jobs:
-  test:
+  check-style:
     runs-on: ubuntu-latest
 
     steps:
