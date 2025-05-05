@@ -24,7 +24,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env()
 
 # Загрузка переменных окружения из файла .env
-env.read_env()
+env.read_env(os.path.join(BASE_DIR, '..', '.env'))
 
 AUTH_USER_MODEL = 'users.User'
 
