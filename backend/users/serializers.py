@@ -1,8 +1,8 @@
 from rest_framework import serializers
 
 from foodgram.fields import Base64ImageField
-from recipes.serializers import ShortRecipeSerializer
-from .models import User, Subscribe
+from .models import User
+from subscriptions.models import Subscription
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -19,7 +19,7 @@ class UserSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if not request or not request.user.is_authenticated:
             return False
-        return Subscribe.objects.filter(
+        return Subscription.objects.filter(
             user=request.user,
             followed_user=obj
         ).exists()
@@ -68,54 +68,3 @@ class PasswordChangeSerializer(serializers.Serializer):
         new_password = self.validated_data['new_password']
         user.set_password(new_password)
         user.save()
-
-
-class SubscribeSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(
-        queryset=User.objects.all(),
-        write_only=True
-    )
-
-    class Meta:
-        model = Subscribe
-        fields = ['user', 'followed_user']
-
-    def to_representation(self, instance):
-        request = self.context.get('request')
-
-        recipes_limit = int(request.query_params.get('recipes_limit', 5))
-
-        user_data = UserSerializer(
-            instance.followed_user,
-            context={'request': request},
-        ).data
-
-        recipes = instance.followed_user.recipes.all()[:recipes_limit]
-        recipes_data = ShortRecipeSerializer(recipes, many=True).data
-
-        user_data.update({
-            "recipes": recipes_data,
-            "recipes_count": instance.followed_user.recipes.count()
-        })
-
-        return user_data
-
-    def delete(self):
-        user = self.context['request'].user
-        followed_user_id = self.initial_data.get('followed_user')
-        if not followed_user_id:
-            return False
-        obj = Subscribe.objects.filter(
-            user=user,
-            followed_user=followed_user_id,
-        ).first()
-        if obj:
-            obj.delete()
-            return True
-        return False
-
-    def get_subscriptions(self):
-        user = self.context['request'].user
-        subscriptions = Subscribe.objects.filter(user=user)
-        return [self.to_representation(subscription)
-                for subscription in subscriptions]

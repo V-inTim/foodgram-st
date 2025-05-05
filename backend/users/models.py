@@ -39,29 +39,3 @@ class User(AbstractUser):
     class Meta:
         verbose_name = "Пользователь"
         verbose_name_plural = "Пользователи"
-
-
-class Subscribe(models.Model):
-    user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='user_subscribe'
-    )
-    followed_user = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        related_name='followed_user_subscribe'
-    )
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['user', 'followed_user'],
-                name='unique_subscribe'
-            )
-        ]
-        verbose_name = "Подписка"
-        verbose_name_plural = "Подписки"
-
-    def __str__(self):
-        return f'{self.followed_user} - {self.user}'

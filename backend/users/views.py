@@ -10,7 +10,6 @@ from .serializers import (
     UserSerializer,
     UserAvatarSerializer,
     PasswordChangeSerializer,
-    SubscribeSerializer,
 )
 
 
@@ -82,50 +81,3 @@ class UserViewSet(viewsets.ModelViewSet):
                             status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    @action(
-        detail=False,
-        methods=("get",),
-        permission_classes=(IsAuthenticated,),
-        url_path="subscriptions",
-        url_name="subscriptions",
-    )
-    def subscriptions(self, request):
-        serializer = SubscribeSerializer(context={"request": request})
-        subscriptions = serializer.get_subscriptions()
-
-        paginator = CustomPagination()
-        paginated_subscriptions = paginator.paginate_queryset(
-            subscriptions,
-            request,
-        )
-
-        return paginator.get_paginated_response(paginated_subscriptions)
-
-    @action(
-        detail=True,
-        methods=("post", "delete"),
-        permission_classes=(IsAuthenticated,),
-        url_path="subscribe",
-        url_name="subscribe",
-    )
-    def subscribe(self, request, pk):
-        if request.method == "POST":
-            serializer = SubscribeSerializer(
-                data={"followed_user": pk, "user": request.user.pk},
-                context={"request": request},
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-        serializer = SubscribeSerializer(
-            context={"request": request},
-            data={"followed_user": pk}
-        )
-        if serializer.delete():
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(
-            {"detail": "Ошибка отписки"},
-            status=status.HTTP_400_BAD_REQUEST
-        )
