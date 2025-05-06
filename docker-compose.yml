@@ -17,9 +17,7 @@ services:
       retries: 5
 
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
+    image: vinichuktimofey/foodgram_back:latest
     container_name: backend
     restart: always
     volumes:
@@ -32,7 +30,8 @@ services:
       - .env
 
   frontend:
-    build: ./frontend
+    image: vinichuktimofey/foodgram_front:latest
+    container_name: frontend
     volumes:
        - frontend_build:/app/result_build/
     depends_on:
