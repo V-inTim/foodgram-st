@@ -8,7 +8,7 @@ from .models import (
     ShoppingList,
     Favorite,
 )
-from foodgram.fields import Base64ImageField
+from api.fields import Base64ImageField
 from users.serializers import UserSerializer
 
 
