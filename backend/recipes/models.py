@@ -2,6 +2,11 @@ from django.db import models
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from ingredients.models import Ingredient
+from django.core.validators import MinValueValidator
+from foodgram.constants import (
+    RECIPE_MIN_COOKING_TIME,
+    INGREDIENT_MIN_AMOUNT_IN_RECIPE,
+)
 
 
 class Recipe(models.Model):
@@ -18,12 +23,18 @@ class Recipe(models.Model):
         Ingredient,
         through='RecipeIngredient',
     )
-    cooking_time = models.PositiveIntegerField(null=False)
+    cooking_time = models.PositiveIntegerField(
+        null=False,
+        validators=[
+            MinValueValidator(RECIPE_MIN_COOKING_TIME),
+        ],
+    )
 
     def __str__(self):
         return self.name
 
     class Meta:
+        ordering = ['-id']
         verbose_name = "Рецепт"
         verbose_name_plural = "Рецепты"
 
@@ -32,13 +43,19 @@ class RecipeIngredient(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='recipe_ingredients'
+        related_name='recipe_links'
     )
     ingredient = models.ForeignKey(
         Ingredient,
         on_delete=models.CASCADE,
+        related_name='ingredient_links'
     )
-    amount = models.IntegerField()
+    amount = models.PositiveSmallIntegerField(
+        verbose_name="Количество",
+        validators=[
+            MinValueValidator(INGREDIENT_MIN_AMOUNT_IN_RECIPE),
+        ],
+    )
 
     class Meta:
         verbose_name = 'Ингредиент в рецепте'
@@ -54,28 +71,28 @@ class RecipeIngredient(models.Model):
         return f'{self.ingredient} - {self.amount}'
 
 
-class ShoppingList(models.Model):
+class ShoppingCard(models.Model):
     user = models.ForeignKey(
         get_user_model(),
         on_delete=models.CASCADE,
-        related_name='user_shopping_list'
+        related_name='user_shopping_card'
     )
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
-        related_name='recipe_shopping_list'
+        related_name='recipe_shopping_card'
     )
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'recipe'],
-                name='unique_shopping_list'
+                name='unique_shopping_card'
             )
         ]
         verbose_name = "Продукт"
         verbose_name_plural = "Продукты"
-        default_related_name = "shopping_list"
+        default_related_name = "shopping_card"
 
     def __str__(self):
         return f'{self.user} - {self.recipe}'

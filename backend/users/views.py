@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework import status
 
-from foodgram.pagination import CustomPagination
+from api.pagination import DefaultPagination
 from .models import User
 from .serializers import (
     UserSerializer,
@@ -16,7 +16,7 @@ from .serializers import (
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    pagination_class = CustomPagination
+    pagination_class = DefaultPagination
     permission_classes = [AllowAny,]
 
     def update(self, request, *args, **kwargs):

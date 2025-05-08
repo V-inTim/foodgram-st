@@ -1,9 +1,20 @@
 from django.db import models
 
+from foodgram.constants import (
+    INGREDIENT_MEASUREMENT_UNIT_MAX_LENGTH,
+    INGREDIENT_NAME_MAX_LENGTH,
+)
+
 
 class Ingredient(models.Model):
-    name = models.CharField(null=False, max_length=200)
-    measurement_unit = models.CharField(null=False, max_length=100)
+    name = models.CharField(
+        null=False,
+        max_length=INGREDIENT_NAME_MAX_LENGTH,
+    )
+    measurement_unit = models.CharField(
+        null=False,
+        max_length=INGREDIENT_MEASUREMENT_UNIT_MAX_LENGTH,
+    )
 
     def __str__(self):
         return self.name

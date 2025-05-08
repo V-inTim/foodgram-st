@@ -3,13 +3,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 
-from foodgram.pagination import CustomPagination
+from api.pagination import DefaultPagination
 from .serializers import SubscribeSerializer
 
 
 class SubscriptionListAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    pagination_class = CustomPagination
+    pagination_class = DefaultPagination
 
     def get(self, request):
         serializer = SubscribeSerializer(context={"request": request})

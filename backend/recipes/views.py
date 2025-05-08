@@ -9,21 +9,21 @@ from rest_framework.response import Response
 from django.http import HttpResponse
 from django_filters.rest_framework import DjangoFilterBackend
 
-from foodgram.pagination import CustomPagination
-from foodgram.permissions import IsAuthorOrReadOnly
+from api.pagination import DefaultPagination
+from api.permissions import IsAuthorOrReadOnly
 from .serializers import (
     RecipeSerializer,
     ShoppingListSerializer,
     FavoriteSerializer,
 )
 from .models import Recipe
-from .filters import RecipeFilter
+from api.filters import RecipeFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     serializer_class = RecipeSerializer
-    pagination_class = CustomPagination
+    pagination_class = DefaultPagination
     permission_classes = [IsAuthenticatedOrReadOnly, IsAuthorOrReadOnly]
     filter_backends = [DjangoFilterBackend]
     filterset_class = RecipeFilter
