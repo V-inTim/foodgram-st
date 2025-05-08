@@ -24,7 +24,7 @@ class RecipeFilter(FilterSet):
             value = bool(int(value))
             if value and self.request.user.is_authenticated:
                 return queryset.filter(
-                    recipe_shopping_list__user=self.request.user,
+                    recipe_shopping_card__user=self.request.user,
                 )
         return queryset
 
