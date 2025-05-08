@@ -5,10 +5,10 @@ from rest_framework import serializers
 from .models import (
     Recipe,
     RecipeIngredient,
-    ShoppingList,
+    ShoppingCard,
     Favorite,
 )
-from foodgram.fields import Base64ImageField
+from api.fields import Base64ImageField
 from users.serializers import UserSerializer
 
 
@@ -31,13 +31,13 @@ class RecipeSerializer(serializers.ModelSerializer):
     ingredients = RecipeIngredientSerializer(
         many=True,
         required=True,
-        source='recipe_ingredients')
+        source='recipe_links',
+    )
 
     class Meta:
         model = Recipe
         fields = ['id', 'author', 'name', 'image',
                   'text', 'ingredients', 'cooking_time']
-        read_only_fields = ['id']
 
     def validate(self, data):
         if self.context['request'].method == 'POST':
@@ -48,7 +48,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        ingredients_data = validated_data.pop('recipe_ingredients')
+        ingredients_data = validated_data.pop('recipe_links')
         recipe = Recipe.objects.create(**validated_data)
 
         for ingredient_data in ingredients_data:
@@ -61,7 +61,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
-        ingredients_data = validated_data.pop('recipe_ingredients')
+        ingredients_data = validated_data.pop('recipe_links')
         instance = super().update(instance, validated_data)
 
         instance.ingredients.clear()
@@ -83,7 +83,7 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
 
 class ShoppingListSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ShoppingList
+        model = ShoppingCard
         fields = ['recipe', 'user']
 
     def to_representation(self, instance):
@@ -94,7 +94,7 @@ class ShoppingListSerializer(serializers.ModelSerializer):
         recipe_id = self.initial_data.get('recipe')
         if not recipe_id:
             return False
-        obj = ShoppingList.objects.filter(user=user, recipe=recipe_id).first()
+        obj = ShoppingCard.objects.filter(user=user, recipe=recipe_id).first()
         if obj:
             obj.delete()
             return True
@@ -103,9 +103,9 @@ class ShoppingListSerializer(serializers.ModelSerializer):
     def get_shopping_list(self):
         user = self.context['request'].user
         shopping_list = (
-            ShoppingList.objects.filter(user=user)
+            ShoppingCard.objects.filter(user=user)
             .select_related('recipe')
-            .prefetch_related('recipe__recipe_ingredients__ingredient')
+            .prefetch_related('recipe__recipe_links__ingredient')
         )
 
         ingredient_data = defaultdict(
@@ -114,7 +114,7 @@ class ShoppingListSerializer(serializers.ModelSerializer):
 
         for item in shopping_list:
             recipe = item.recipe
-            for ri in recipe.recipe_ingredients.all():
+            for ri in recipe.recipe_links.all():
                 ingredient = ri.ingredient
                 key = ingredient.id
                 ingredient_data[key]['name'] = ingredient.name

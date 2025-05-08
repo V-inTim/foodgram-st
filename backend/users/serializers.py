@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from foodgram.fields import Base64ImageField
+from api.fields import Base64ImageField
 from .models import User
 from subscriptions.models import Subscription
 
