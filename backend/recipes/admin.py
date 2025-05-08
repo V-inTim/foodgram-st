@@ -1,15 +1,26 @@
 from django.contrib import admin
-from .models import Recipe, RecipeIngredient, Favorite, ShoppingList
+from .models import Recipe, RecipeIngredient, Favorite, ShoppingCard
 from django.db.models import Count
 
-admin.site.register(RecipeIngredient)
-admin.site.register(Favorite)
-admin.site.register(ShoppingList)
+
+@admin.register(RecipeIngredient)
+class RecipeIngredientAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(Favorite)
+class FavoriteAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(ShoppingCard)
+class ShoppingCardAdmin(admin.ModelAdmin):
+    pass
 
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    list_display = ('name', 'author', 'cooking_time', 'favorites_count',
+    list_display = ('id', 'name', 'author', 'cooking_time', 'favorites_count',
                     'ingredients_list')
     search_fields = ('name', 'author__username', 'author__email',
                      'ingredients__name')
@@ -27,11 +38,13 @@ class RecipeAdmin(admin.ModelAdmin):
             ingredients_count=Count('ingredients')
         )
 
+    @admin.display(
+        description='В избранном',
+        ordering='favorites_count'
+    )
     def favorites_count(self, obj):
         return obj.favorites_count
-    favorites_count.short_description = 'В избранном'
-    favorites_count.admin_order_field = 'favorites_count'
 
+    @admin.display(description='Ингредиенты')
     def ingredients_list(self, obj):
         return ", ".join([ing.name for ing in obj.ingredients.all()])
-    ingredients_list.short_description = 'Ингредиенты'
