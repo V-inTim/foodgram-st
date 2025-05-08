@@ -31,7 +31,7 @@ class IngredientAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         queryset = super().get_queryset(request)
         queryset = queryset.annotate(
-            _recipe_count=Count('recipeingredient', distinct=True)
+            _recipe_count=Count('ingredient_links', distinct=True)
         )
         return queryset
 
