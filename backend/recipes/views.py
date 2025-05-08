@@ -17,7 +17,7 @@ from .serializers import (
     FavoriteSerializer,
 )
 from .models import Recipe
-from .filters import RecipeFilter
+from api.filters import RecipeFilter
 
 
 class RecipeViewSet(viewsets.ModelViewSet):

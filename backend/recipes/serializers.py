@@ -5,7 +5,7 @@ from rest_framework import serializers
 from .models import (
     Recipe,
     RecipeIngredient,
-    ShoppingList,
+    ShoppingCard,
     Favorite,
 )
 from api.fields import Base64ImageField
@@ -31,13 +31,13 @@ class RecipeSerializer(serializers.ModelSerializer):
     ingredients = RecipeIngredientSerializer(
         many=True,
         required=True,
-        source='recipe_ingredients')
+        source='recipe_ingredients',
+    )
 
     class Meta:
         model = Recipe
         fields = ['id', 'author', 'name', 'image',
                   'text', 'ingredients', 'cooking_time']
-        read_only_fields = ['id']
 
     def validate(self, data):
         if self.context['request'].method == 'POST':
@@ -83,7 +83,7 @@ class ShortRecipeSerializer(serializers.ModelSerializer):
 
 class ShoppingListSerializer(serializers.ModelSerializer):
     class Meta:
-        model = ShoppingList
+        model = ShoppingCard
         fields = ['recipe', 'user']
 
     def to_representation(self, instance):
@@ -94,7 +94,7 @@ class ShoppingListSerializer(serializers.ModelSerializer):
         recipe_id = self.initial_data.get('recipe')
         if not recipe_id:
             return False
-        obj = ShoppingList.objects.filter(user=user, recipe=recipe_id).first()
+        obj = ShoppingCard.objects.filter(user=user, recipe=recipe_id).first()
         if obj:
             obj.delete()
             return True
@@ -103,7 +103,7 @@ class ShoppingListSerializer(serializers.ModelSerializer):
     def get_shopping_list(self):
         user = self.context['request'].user
         shopping_list = (
-            ShoppingList.objects.filter(user=user)
+            ShoppingCard.objects.filter(user=user)
             .select_related('recipe')
             .prefetch_related('recipe__recipe_ingredients__ingredient')
         )
