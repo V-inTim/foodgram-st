@@ -31,7 +31,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     ingredients = RecipeIngredientSerializer(
         many=True,
         required=True,
-        source='recipe_ingredients',
+        source='recipe_links',
     )
 
     class Meta:
@@ -48,7 +48,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
-        ingredients_data = validated_data.pop('recipe_ingredients')
+        ingredients_data = validated_data.pop('recipe_links')
         recipe = Recipe.objects.create(**validated_data)
 
         for ingredient_data in ingredients_data:
@@ -61,7 +61,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
-        ingredients_data = validated_data.pop('recipe_ingredients')
+        ingredients_data = validated_data.pop('recipe_links')
         instance = super().update(instance, validated_data)
 
         instance.ingredients.clear()
@@ -105,7 +105,7 @@ class ShoppingListSerializer(serializers.ModelSerializer):
         shopping_list = (
             ShoppingCard.objects.filter(user=user)
             .select_related('recipe')
-            .prefetch_related('recipe__recipe_ingredients__ingredient')
+            .prefetch_related('recipe__recipe_links__ingredient')
         )
 
         ingredient_data = defaultdict(
@@ -114,7 +114,7 @@ class ShoppingListSerializer(serializers.ModelSerializer):
 
         for item in shopping_list:
             recipe = item.recipe
-            for ri in recipe.recipe_ingredients.all():
+            for ri in recipe.recipe_links.all():
                 ingredient = ri.ingredient
                 key = ingredient.id
                 ingredient_data[key]['name'] = ingredient.name
